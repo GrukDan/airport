@@ -1,0 +1,161 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+  <a class="navbar-brand" href="#">Airport</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+          aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-item nav-link text-white" routerLink="/home/table">Home</a>
+      <a class="nav-item nav-link text-white" routerLink="/tasks/table">Задачи</a>
+      <a class="nav-item nav-link text-white" routerLink="/airports/table">Аэропорты</a>
+      <a class="nav-item nav-link text-white" routerLink="/users/table">Пользователи</a>
+      <a class="btn nav-item nav-link text-white" (click)="openTaskModal(addTaskModal)">Новая задача</a>
+      <a class="btn nav-item nav-link text-white" (click)="openUserModal(addUserModal)">Новый пользователь</a>
+      <div
+        *ngIf="tokenStorage.isAuthorized()"
+        class="btn-group"
+        style="margin-left: 40px; margin-right: 100px"
+        dropdown>
+        <button id="button-animated" dropdownToggle type="button" class="btn btn-primary dropdown-toggle"
+                aria-controls="dropdown-animated">
+          <i class="fa fa-user"></i> <span class="caret"></span>
+        </button>
+        <ul id="dropdown-animated" *dropdownMenu class="dropdown-menu"
+            role="menu" aria-labelledby="button-animated">
+          <li role="menuitem"><a class="dropdown-item"
+                                 routerLinkActive="active"
+                                 [routerLink]="['/home',btoa(tokenStorage.getIdUser().toString()),
+        tokenStorage.getUserName()+ ' ' + tokenStorage.getUserSurname()]"><i class="fa fa-home"> Home</i></a></li>
+          <li role="menuitem"><a class="dropdown-item"
+                                 routerLink="/"><i class="fa fa-info-circle"> Информация</i></a>
+          </li>
+          <li class="divider dropdown-divider"></li>
+          <li role="menuitem"><a class="dropdown-item"
+                                 routerLink="/home"
+                                 (click)="signOut()"><i class="fa fa-sign-out">Sign out</i></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+<router-outlet></router-outlet>
+
+
+<ng-template #addUserModal>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Новый пользователь</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="userForm" novalidate>
+      <div class="form-group">
+        <label for="userNameInput" class="mt-3 h5">Имя пользователя</label>
+        <input type="text" class="form-control" id="userNameInput" formControlName="userName"
+               [(ngModel)]="user.userName">
+        <div *ngIf="_userName.invalid && (_userName.touched || _userName.dirty)" class="alert alert-danger">
+          <p *ngIf="_userName.errors?.required">Обязательное поле</p>
+          <p *ngIf="_userName.errors?.minlength">Слишком короткое имя</p>
+          <p *ngIf="_userName.errors?.maxlength">Слишком длинное имя</p>
+          <p *ngIf="_userName.errors?.pattern">Ошибка введенных данных</p>
+        </div>
+        <label for="userSurnameInput" class="mt-3 h5">Фамилия пользователя</label>
+        <input type="text" class="form-control" id="userSurnameInput" formControlName="userSurname"
+               [(ngModel)]="user.userSurname">
+        <div *ngIf="_userSurname.invalid && (_userSurname.touched || _userSurname.dirty)" class="alert alert-danger">
+          <p *ngIf="_userSurname.errors?.required">Обязательное поле</p>
+          <p *ngIf="_userSurname.errors?.minlength">Слишком короткая фамилия</p>
+          <p *ngIf="_userSurname.errors?.maxlength">Слишком длинная фамилия</p>
+          <p *ngIf="_userSurname.errors?.pattern">Ошибка введенных данных</p>
+        </div>
+        <label for="userEmailInput" class="mt-3 h5">Email</label>
+        <input type="email" class="form-control" id="userEmailInput" formControlName="email" [(ngModel)]="user.email">
+        <div *ngIf="_email.invalid && (_email.touched || _email.dirty)" class="alert alert-danger">
+          <p *ngIf="_email.errors?.required">Обязательное поле</p>
+          <p *ngIf="_email.errors?.pattern">Ошибка введенных данных</p>
+        </div>
+        <label for="roleSelect" class="mt-3 h5">Должность</label>
+        <select class="form-control" id="roleSelect" name="roleSelect" formControlName="role" [(ngModel)]="user.role">
+          <option *ngFor="let role of roles"
+                  [value]="role.idRole">{{role.role}}</option>
+        </select>
+        <div *ngIf="_role.invalid && (_role.touched || _role.dirty)" class="alert alert-danger">
+          <p *ngIf="_role.errors?.required">Обязательное поле</p>
+        </div>
+        <label for="loginInput" class="mt-3 h5">Логин</label>
+        <input type="text" class="form-control" id="loginInput" formControlName="login" [(ngModel)]="user.login">
+        <div *ngIf="_login.invalid && (_login.touched || _login.dirty)" class="alert alert-danger">
+          <p *ngIf="_login.errors?.required">Обязательное поле</p>
+          <p *ngIf="_login.errors?.pattern">Ошибка введенных данных</p>
+          <p *ngIf="_login.errors?.minlength">Слишком короткий логин</p>
+          <p *ngIf="_login.errors?.maxlength">Слишком длинный логин</p>
+        </div>
+        <label for="passwordInput" class="mt-3 h5">Пароль</label>
+        <input type="password" class="form-control" id="passwordInput" formControlName="password"
+               [(ngModel)]="user.password">
+        <div *ngIf="_password.invalid && (_password.touched || _password.dirty)" class="alert alert-danger">
+          <p *ngIf="_password.errors?.required">Обязательное поле</p>
+          <p *ngIf="_password.errors?.pattern">Ошибка введенных данных</p>
+          <p *ngIf="_password.errors?.minlength">Слишком короткий пароль</p>
+          <p *ngIf="_password.errors?.maxlength">Слишком длинный пароль</p>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modalRef.hide()">Закрыть</button>
+    <button class="btn btn-primary" [disabled]="userForm.invalid" (click)="addUser()">Добавить</button>
+  </div>
+</ng-template>
+
+
+<ng-template #addTaskModal>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Новая задача</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="taskForm" novalidate>
+      <div class="form-group">
+        <label for="taskName" class="mt-3 h5">Название задачи</label>
+        <input type="text"
+               class="form-control"
+               id="taskName"
+               formControlName="taskName"
+               [(ngModel)]="task.taskName">
+        <div *ngIf="_taskName.invalid && (_taskName.touched || _taskName.dirty)" class="alert alert-danger">
+          <p *ngIf="_taskName.errors?.required">Обязательное поле</p>
+          <p *ngIf="_taskName.errors?.minlength">Слишком короткое название</p>
+          <p *ngIf="_taskName.errors?.maxlength">Слишком длинное название</p>
+          <p *ngIf="_taskName.errors?.pattern">Ошибка введенных данных</p>
+        </div>
+        <!--        <label for="taskExecutor" class="mt-3 h5">Исполнитель задачи</label>-->
+        <!--        <select class="form-control"-->
+        <!--                id="taskExecutor"-->
+        <!--                name="taskExecutor"-->
+        <!--                formControlName="taskExecutor"-->
+        <!--                #executor-->
+        <!--                [(ngModel)]="task.taskExecutor">-->
+        <!--          <option *ngFor="let executor of userForTask"-->
+        <!--                  [value]="executor.iduser">{{executor.userSurname}} {{executor.userName}}</option>-->
+        <!--        </select>-->
+        <label for="descriptionTask" class="mt-3 h5">Описание задачи</label>
+        <textarea type="text" class="form-control" id="descriptionTask" formControlName="description"
+                  [(ngModel)]="task.description"></textarea>
+        <div *ngIf="_taskDescription.invalid && (_taskDescription.touched || _taskDescription.dirty)"
+             class="alert alert-danger">
+          <p *ngIf="_taskDescription.errors?.minlength">Слишком короткое описание</p>
+          <p *ngIf="_taskDescription.errors?.maxlength">Слишком длинное описание</p>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modalRef.hide()">Закрыть</button>
+    <button class="btn btn-primary" [disabled]="taskForm.invalid">Добавить</button>
+  </div>
+</ng-template>

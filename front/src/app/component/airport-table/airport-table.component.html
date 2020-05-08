@@ -1,0 +1,27 @@
+<div class="container-fluid">
+  <table class="table table-hover table-dark mt-5">
+    <thead class="h4">
+    <tr>
+      <th class="text-center"  >№</th>
+      <th class="text-center"  >Страна</th>
+      <th class="text-center"  >Город</th>
+      <th class="text-center"  >Название аэропорта</th>
+    </tr>
+    </thead>
+    <tbody *ngIf="airportViewModels.length>0; then table else void_table;">
+    </tbody>
+    <ng-template #table>
+      <tr *ngFor="let airport of airportViewModels;let i = index" class="text-center ">
+        <td class="h6">{{i + 1}}</td>
+        <td class="h6"><a>{{airport.country}}</a></td>
+        <td class="h6"><a>{{airport.city}}</a></td>
+        <td class="h6"><a>{{airport.airport}}</a></td>
+      </tr>
+    </ng-template>
+  </table>
+  <ng-template #void_table>
+    <tr>
+      <td colspan="6" class="h3">Нет данных об аэропортах.</td>
+    </tr>
+  </ng-template>
+</div>

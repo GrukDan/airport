@@ -1,0 +1,48 @@
+<div class="container-fluid">
+  <table class="table table-hover table-dark mt-5">
+    <thead class="h4">
+    <tr>
+      <th class="text-center" style="cursor: pointer" (click)="sort(parameters[0])">Имя</th>
+      <th class="text-center" style="cursor: pointer" (click)="sort(parameters[1])">Фамилия</th>
+      <th class="text-center" style="cursor: pointer" (click)="sort(parameters[2])">Email</th>
+      <th class="text-center" style="cursor: pointer" (click)="sort(parameters[3])">Должность</th>
+      <th class="text-center" >Выполняемая задача</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody *ngIf="userViewModels.length>0; then table else void_table;">
+    </tbody>
+    <ng-template #table>
+      <tr *ngFor="let user of userViewModels" class="text-center ">
+        <td class="h6">{{user.userName}}</td>
+        <td class="h6">{{user.userSurname}}</td>
+        <td class="h6">{{user.email}}</td>
+        <td class="h6">{{user.roleName}}</td>
+        <td class="h6">
+          <a *ngIf="user?.assessmentTask!=null;"
+             routerLinkActive="active"
+             [routerLink]="['/tasks',btoa(user.assessmentTask.toString()),user.assessmentTask]">{{user.assessmentTaskName}}</a>
+          <span *ngIf="user?.assessmentTask==null;">Нет задачи!</span>
+        </td>
+        <td>
+          <button class="btn btn-primary" [routerLink]="['/home',btoa(user?.idUser?.toString()),
+        user?.userName+ ' ' + user?.userSurname]">Подробнее
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </table>
+  <div class="row">
+    <div class="col-xs-12 col-12">
+      <pagination [boundaryLinks]="true" [totalItems]="countOfPages" class="justify-content-center"
+                  previousText="&lsaquo;" nextText="&rsaquo;" firstText="&laquo;" lastText="&raquo;"
+                  (pageChanged)="pageChanged($event)">
+      </pagination>
+    </div>
+  </div>
+  <ng-template #void_table>
+    <tr>
+      <td colspan="6" class="h3">Нет пользователей.</td>
+    </tr>
+  </ng-template>
+</div>

@@ -1,0 +1,104 @@
+<carousel>
+  <slide>
+    <img src="assets/images/first-page/1.jpg" alt="first slide" style="display: block; height: 100%;">
+    <div class="carousel-caption d-none d-md-block " >
+      <div *ngIf="templateShow; then welcome"></div>
+      <div class="text-center py-5 text-white">
+        <h2>Система управления проектами и задачами</h2>
+        <div class="lead">
+          <p>Эффективное решение для вашего бизнесса.</p>
+        </div>
+      </div>
+    </div>
+  </slide>
+  <slide>
+    <img src="assets/images/first-page/2.jpg" alt="second slide" style="display: block; height: 100%;">
+    <div class="carousel-caption d-none d-md-block " >
+      <div *ngIf="templateShow; then welcome"></div>
+      <div class="text-center py-5 text-white">
+        <h2>Лучший на рынке систем управления</h2>
+        <div class="lead">
+          <p>Наш продукт давно является лидером в своей категории.</p>
+        </div>
+      </div>
+    </div>
+  </slide>
+  <slide>
+    <img src="assets/images/first-page/3.jpg" alt="third slide" style="display: block; height: 100%;">
+    <div class="carousel-caption d-none d-md-block " >
+      <div *ngIf="templateShow; then welcome"></div>
+      <div class="text-center py-5 text-white">
+        <h2>Высокий уровень качества</h2>
+        <div class="lead">
+          <p>Продукт является сертифицированным и лицензированным.</p>
+        </div>
+      </div>
+    </div>
+  </slide>
+</carousel>
+
+
+<ng-template #welcome>
+  <div>
+    <div style=" margin-bottom: 20%">
+      <h1>
+      <span style="font-weight: bolder">
+        WELCOME
+      </span>
+      </h1>
+      <button class="btn btn-primary btn-lg mt-3 h3" (click)="openModal(logIn)">LOG IN</button>
+    </div>
+  </div>
+</ng-template>
+
+
+<ng-template #logIn>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Log in</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <form>
+        <div class="form-group">
+          <label for="loginInput">Login</label>
+          <input type="text"
+                 id="loginInput"
+                 class="form-control"
+                 name="userLogin"
+                 required
+                 [(ngModel)]="user.login"
+                 #userLogin="ngModel"/>
+          <div [hidden]="userLogin.valid||userLogin.untouched" class="alert alert-danger">
+            Ошибка ввода логина
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="passwordInput">Password</label>
+          <input type="password"
+                 id="passwordInput"
+                 class="form-control"
+                 name="userPassword"
+                 required
+                 [(ngModel)]="user.password"
+                 #userPassword="ngModel"/>
+          <div [hidden]="userPassword.valid||userPassword.untouched" class="alert alert-danger">
+            Ошибка ввода пароля
+          </div>
+        </div>
+      </form>
+      <div *ngIf="error"
+           class="alert alert-danger">
+        <span>{{errorMessage}}</span>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modalRef.hide()">Close</button>
+    <button class="btn btn-primary"
+            [disabled]=" userLogin.invalid || userPassword.invalid|| userLogin.untouched ||userPassword.untouched"
+            (click)="authorization() ">Log in</button>
+  </div>
+</ng-template>
