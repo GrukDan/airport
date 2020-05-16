@@ -60,7 +60,7 @@ export class UserTableComponent implements OnInit {
       this.direction
     ).subscribe(sortedUsers => {
       this.userViewModels = sortedUsers.userViewModels as UserViewModel[];
-      this.countOfPages = sortedUsers.countPages * 10;
+      this.countOfPages = sortedUsers.countOfPages * 10;
     }))
   }
 

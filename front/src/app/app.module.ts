@@ -21,6 +21,7 @@ import {AirportTableComponent} from "./component/airport-table/airport-table.com
 import {TaskPageComponent} from "./component/task-page/task-page.component";
 import {PaginationModule} from "ngx-bootstrap/pagination";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {ChartsModule} from "ng2-charts";
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     HttpClientModule,
     PaginationModule.forRoot(),
     BrowserAnimationsModule,
+    ChartsModule,
   ],
   providers: [HttpClientModule],
   bootstrap: [AppComponent]

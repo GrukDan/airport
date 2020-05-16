@@ -1,9 +1,6 @@
 package bsuir.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
 
@@ -12,10 +9,11 @@ public class Rating {
     private long idRating;
     private long rating;
     private long expert;
-    private int alternative;
+    private long alternative;
     private Timestamp timeOfCreation;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_rating", nullable = false)
     public long getIdRating() {
         return idRating;
@@ -47,16 +45,16 @@ public class Rating {
 
     @Basic
     @Column(name = "alternative", nullable = false)
-    public int getAlternative() {
+    public long getAlternative() {
         return alternative;
     }
 
-    public void setAlternative(int alternative) {
+    public void setAlternative(long alternative) {
         this.alternative = alternative;
     }
 
     @Basic
-    @Column(name = "timeOfCreation", nullable = false)
+    @Column(name = "time_of_creation", nullable = false)
     public Timestamp getTimeOfCreation() {
         return timeOfCreation;
     }

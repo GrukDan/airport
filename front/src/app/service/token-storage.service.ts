@@ -50,10 +50,10 @@ export class TokenStorageService {
   }
 
   public isAdmin():boolean{
-    return this.getUser()["role"] == this.roles[0];
+    return this.getUser()["roleName"] == this.roles[0];
   }
 
   isExpert():boolean {
-    return this.getUser()["role"] == this.roles[1];
+    return this.getUser()["roleName"] == this.roles[1];
   }
 }

@@ -1,21 +1,21 @@
 <div class="container-fluid">
   <table class="table table-hover table-dark mt-5">
-    <thead class="h4">
+    <thead class="h2">
     <tr>
       <th class="text-center">№</th>
       <th class="text-center" style="cursor: pointer" (click)="sort(parameters[0])">Название задачи</th>
       <th class="text-center" style="cursor: pointer" (click)="sort(parameters[1])">Дата создания</th>
-      <th class="text-center" style="cursor: pointer" >Описание</th>
+      <th class="text-center"  >Описание</th>
       <th></th>
     </tr>
     </thead>
     <tbody *ngIf="tasks.length>0; then table else void_table;">
     </tbody>
     <ng-template #table>
-      <tr *ngFor="let task of tasks;let i = index" class="text-center ">
-        <td class="h6">{{i + 1}}</td>
-        <td class="h6">{{task.taskName}}</td>
-        <td class="h6">{{task.dateOfCreation | date}}</td>
+      <tr *ngFor="let task of tasks;let i = index" class="text-center h3">
+        <td>{{i + 1}}</td>
+        <td>{{task.taskName}}</td>
+        <td>{{task.dateOfCreation | date}}</td>
         <td class="h6">{{task.description}}</td>
         <td>
           <button class="btn btn-primary"

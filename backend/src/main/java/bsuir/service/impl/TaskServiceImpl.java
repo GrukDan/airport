@@ -5,6 +5,9 @@ import bsuir.model.paginationModel.TaskPaginationModel;
 import bsuir.repository.TaskRepository;
 import bsuir.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -20,7 +23,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task save(Task task) {
-        return taskRepository.save(task);
+        taskRepository.save(task);
+        return taskRepository.findByTaskNameAndDateOfCreation(task.getTaskName(),task.getDateOfCreation());
     }
 
     @Override
@@ -30,7 +34,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task getById(long id) {
-        return taskRepository.getOne(id);
+        return taskRepository.findById(id).get();
     }
 
     @Override
@@ -45,6 +49,15 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskPaginationModel getSortedTask(String parameter, int page, int size, boolean direction) {
-        return null;
+        Page<Task> taskPage;
+        if (direction)
+            taskPage = taskRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, parameter)));
+        else
+            taskPage = taskRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, parameter)));
+
+        List<Task> tasks = taskPage.getContent();
+        Task[] tasks1 = new Task[tasks.size()];
+        tasks.toArray(tasks1);
+        return new TaskPaginationModel(taskPage.getTotalPages(), page, tasks1);
     }
 }

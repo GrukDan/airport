@@ -12,10 +12,10 @@ public class User {
     private String userName;
     private String userSurname;
     private String email;
-    private long role;
     private String login;
     private String password;
     private Long assessmentTask;
+    private long role;
 
     @Id
     @Column(name = "id_user", nullable = false)
@@ -58,16 +58,6 @@ public class User {
     }
 
     @Basic
-    @Column(name = "role", nullable = false)
-    public long getRole() {
-        return role;
-    }
-
-    public void setRole(long role) {
-        this.role = role;
-    }
-
-    @Basic
     @Column(name = "login", nullable = false, length = 45)
     public String getLogin() {
         return login;
@@ -97,6 +87,16 @@ public class User {
         this.assessmentTask = assessmentTask;
     }
 
+    @Basic
+    @Column(name = "role", nullable = false)
+    public long getRole() {
+        return role;
+    }
+
+    public void setRole(long role) {
+        this.role = role;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -109,25 +109,11 @@ public class User {
                 Objects.equals(email, user.email) &&
                 Objects.equals(login, user.login) &&
                 Objects.equals(password, user.password) &&
-                Objects.equals(assessmentTask, user.assessmentTask) ;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "idUser=" + idUser +
-                ", userName='" + userName + '\'' +
-                ", userSurname='" + userSurname + '\'' +
-                ", email='" + email + '\'' +
-                ", role=" + role +
-                ", login='" + login + '\'' +
-                ", password='" + password + '\'' +
-                ", assessmentTask=" + assessmentTask +
-                '}';
+                Objects.equals(assessmentTask, user.assessmentTask);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idUser, userName, userSurname, email, role, login, password, assessmentTask);
+        return Objects.hash(idUser, userName, userSurname, email, login, password, assessmentTask, role);
     }
 }

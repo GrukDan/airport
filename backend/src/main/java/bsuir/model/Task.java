@@ -45,7 +45,7 @@ public class Task {
     }
 
     @Basic
-    @Column(name = "dateOfCreation", nullable = false)
+    @Column(name = "date_of_creation", nullable = false)
     public Date getDateOfCreation() {
         return dateOfCreation;
     }

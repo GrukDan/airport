@@ -12,8 +12,7 @@
         </div>
         <div class="my-4">
           <button class="btn btn-primary mr-3"
-                  *ngIf="!edit && (tokenStorage.getIdUser() == userViewModel.idUser
-|| tokenStorage.isAdmin() || tokenStorage.isExpert())"
+                  *ngIf="!edit &&  (tokenStorage.isAdmin() || (tokenStorage.isExpert() && tokenStorage.getIdUser() == userViewModel.idUser))"
                   (click)="startEdit()">Редактировать
           </button>
           <button class="btn btn-primary mr-3" *ngIf="edit" [disabled]="userForm.invalid" (click)="save()">Сохранить
@@ -28,13 +27,59 @@
     <div class="col-8" id="tasks">
       <h1 class="text-center">Задачи пользователя</h1>
       <div class="container-fluid">
-
-        <h3 *ngIf="!tasks?.length"><i>У пользователя нет задач.</i></h3>
+        <h3 *ngIf="!alternatives?.length ;else ratingsTemplate"><i>У пользователя нет задач.</i></h3>
       </div>
     </div>
   </div>
 </div>
 
+<ng-template #ratingsTemplate>
+  <div>
+  <table class="table table-hover table-dark mt-5">
+    <thead class="h4">
+    <tr>
+      <th class="text-center">№</th>
+      <th class="text-center">Альтернатива</th>
+      <th class="text-center">Оценка</th>
+    </tr>
+    </thead>
+    <tbody *ngIf="alternatives?.length>0 ; then table else void_table;">
+    </tbody>
+    <ng-template #table>
+      <tr *ngFor="let alternative of alternatives;let i = index" class="text-center ">
+        <td class="h6">{{i + 1}}</td>
+        <td class="h6"><a style="cursor: pointer">{{getAirportNameByAlternative(alternative)}}</a></td>
+        <td class="h6">
+          <div *ngIf="ratings[i] != undefined ">
+            <rating [max]="alternatives.length"
+                    [(ngModel)]="ratings[i].rating "
+                    [customTemplate]="tt"></rating>
+            <ng-template #tt let-i="index" let-v="value">
+              <button class="btn btn-{{i < v ? 'warning' : 'default'}}">
+                {{i < v ? '&#9733;' : '&#9734;'}}
+              </button>
+            </ng-template>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </table>
+  <div class="alert alert-danger" *ngIf="!checkRatingFlag">
+    Оценки расставлены неправильно
+  </div>
+  <ng-template #void_table>
+    <tr>
+      <td colspan="6" class="h3">Нет альтернатив.</td>
+    </tr>
+  </ng-template>
+  <div *ngIf="alternatives?.length>0">
+    <button class="btn btn-primary" (click)="addRatings()"
+            *ngIf="estimateButton && userViewModel.idUser == tokenStorage.getIdUser()">
+      Оценить
+    </button>
+  </div>
+  </div>
+</ng-template>
 
 <ng-template #editTemplate>
   <div>
@@ -85,14 +130,7 @@
         </div>
       </div>
     </form>
-    <div *ngIf="tokenStorage.isAdmin();else assignProject">
-      <label for="assignProjectSelect" class="mt-3 h5">Выполняемый проект:</label>
-      <select class="form-control" id="assignProjectSelect" name="assignProjectSelect"
-              [(ngModel)]="editUserViewModel.assessmentTask">
-        <option *ngFor="let task of tasks"
-                [value]="task.idTask">{{task.taskName}}</option>
-      </select>
-    </div>
+    <div *ngTemplateOutlet="assignProject"></div>
   </div>
 </ng-template>
 
@@ -124,7 +162,7 @@
   <div id="assignProject">
     <h2>Выполняемый проект:</h2>
     <h4 *ngIf="userViewModel?.assessmentTask!=null">
-      <a [routerLink]="['/projects',btoa(userViewModel?.assessmentTask?.toString()),
+      <a [routerLink]="['/tasks',btoa(userViewModel?.assessmentTask?.toString()),
         userViewModel?.assessmentTaskName]">{{userViewModel.assessmentTaskName}}</a></h4>
     <h4 *ngIf="userViewModel?.assessmentTask==null">Задача остутствует</h4>
   </div>

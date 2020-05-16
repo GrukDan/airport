@@ -1,21 +1,27 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
-  <a class="navbar-brand" href="#">Airport</a>
+  <a class="navbar-brand h1" routerLink="/"><i class="fa fa-font"></i>irp<i class="fa  fa-circle-o-notch fa-spin"></i>rt</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
           aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup" *ngIf="tokenStorage.isAuthorized()">
     <div class="navbar-nav">
-      <a class="nav-item nav-link text-white" routerLink="/home/table">Home</a>
-      <a class="nav-item nav-link text-white" routerLink="/tasks/table">Задачи</a>
-      <a class="nav-item nav-link text-white" routerLink="/airports/table">Аэропорты</a>
-      <a class="nav-item nav-link text-white" routerLink="/users/table">Пользователи</a>
-      <a class="btn nav-item nav-link text-white" (click)="openTaskModal(addTaskModal)">Новая задача</a>
-      <a class="btn nav-item nav-link text-white" (click)="openUserModal(addUserModal)">Новый пользователь</a>
+      <a class="nav-item nav-link text-white" routerLinkActive="active"
+         [routerLink]="['/home',btoa(tokenStorage.getIdUser().toString()),
+        tokenStorage.getUserName()+ ' ' + tokenStorage.getUserSurname()]">Home <i class="fa fa-home"></i></a>
+      <a class="nav-item nav-link text-white" routerLink="/tasks/table">Задачи <i class="fa fa-tasks"></i></a>
+      <a class="nav-item nav-link text-white" routerLink="/airports/table">Аэропорты <i class="fa fa-plane"></i></a>
+      <a class="nav-item nav-link text-white" routerLink="/users/table">Пользователи <i class="fa fa-users"></i></a>
+      <a class="btn nav-item nav-link text-white"
+         *ngIf="tokenStorage.isAdmin()"
+         (click)="openTaskModal(addTaskModal)">Новая задача <i class="fa fa-thumb-tack"></i></a>
+      <a class="btn nav-item nav-link text-white"
+         *ngIf="tokenStorage.isAdmin()"
+         (click)="openUserModal(addUserModal)">Новый пользователь <i class="fa fa-user-plus"></i></a>
       <div
         *ngIf="tokenStorage.isAuthorized()"
         class="btn-group"
-        style="margin-left: 40px; margin-right: 100px"
+        style="margin-left: 500px"
         dropdown>
         <button id="button-animated" dropdownToggle type="button" class="btn btn-primary dropdown-toggle"
                 aria-controls="dropdown-animated">
@@ -133,16 +139,6 @@
           <p *ngIf="_taskName.errors?.maxlength">Слишком длинное название</p>
           <p *ngIf="_taskName.errors?.pattern">Ошибка введенных данных</p>
         </div>
-        <!--        <label for="taskExecutor" class="mt-3 h5">Исполнитель задачи</label>-->
-        <!--        <select class="form-control"-->
-        <!--                id="taskExecutor"-->
-        <!--                name="taskExecutor"-->
-        <!--                formControlName="taskExecutor"-->
-        <!--                #executor-->
-        <!--                [(ngModel)]="task.taskExecutor">-->
-        <!--          <option *ngFor="let executor of userForTask"-->
-        <!--                  [value]="executor.iduser">{{executor.userSurname}} {{executor.userName}}</option>-->
-        <!--        </select>-->
         <label for="descriptionTask" class="mt-3 h5">Описание задачи</label>
         <textarea type="text" class="form-control" id="descriptionTask" formControlName="description"
                   [(ngModel)]="task.description"></textarea>
@@ -151,11 +147,59 @@
           <p *ngIf="_taskDescription.errors?.minlength">Слишком короткое описание</p>
           <p *ngIf="_taskDescription.errors?.maxlength">Слишком длинное описание</p>
         </div>
+        <label for="alternatives" class="mt-3 h5">Альтернативы для выбора</label>
+        <select class="form-control mt-2"
+                id="alternatives"
+                formControlName="alternative"
+                name="alternatives"
+                (change)="checkRepeatAlternative()"
+                *ngFor="let alt of alternatives;let i = index"
+                [(ngModel)]="alternatives[i].airport">
+          <option
+            *ngFor="let airportViewModel of airportViewModels"
+            [value]="airportViewModel.idAirport">
+            {{airportViewModel.country}}/{{airportViewModel.city}}/{{airportViewModel.airport}}
+          </option>
+        </select>
+        <div *ngIf="repeatAlternativeError" class="alert alert-danger">
+          <p>Повторяющаяся альтернатива</p>
+        </div>
+        <div class="text-right my-2">
+          <button
+            class="btn btn-primary"
+            *ngIf="addAlternativeButton"
+            [disabled]="repeatAlternativeError"
+            (click)="addAlternativeSelect()">Добавить</button>
+        </div>
+        <label for="experts" class="mt-3 h5">Эксперты</label>
+        <select class="form-control mt-2"
+                id="experts"
+                formControlName="alternative"
+                name="experts"
+                (change)="checkRepeatExpert()"
+                *ngFor="let exp of updateExperts;let i = index"
+                [(ngModel)]="updateExperts[i].idUser">
+          <option
+            *ngFor="let expert of experts"
+            [value]="expert.idUser">
+            {{expert.userSurname}} {{expert.userName}}
+          </option>
+        </select>
+        <div *ngIf="repeatExpertError" class="alert alert-danger">
+          <p>Повторение эксперта</p>
+        </div>
+        <div class="text-right my-2">
+          <button
+            class="btn btn-primary"
+            *ngIf="addExpertButton"
+            [disabled]="repeatExpertError"
+            (click)="addExpertSelect()">Добавить</button>
+        </div>
       </div>
     </form>
   </div>
   <div class="modal-footer">
     <button class="btn btn-secondary" (click)="modalRef.hide()">Закрыть</button>
-    <button class="btn btn-primary" [disabled]="taskForm.invalid">Добавить</button>
+    <button class="btn btn-primary" [disabled]="taskForm.invalid" (click)="addTask()">Добавить</button>
   </div>
 </ng-template>

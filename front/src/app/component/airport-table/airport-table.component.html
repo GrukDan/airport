@@ -1,21 +1,33 @@
 <div class="container-fluid">
+
+  <div class="row justify-content-center mt-3" *ngIf="tokenStorage.isAdmin()">
+    <div class="col text-center">
+      <button class="btn btn-lg btn-dark " (click)="openCountryModal(addCountryModal)">Новая страна <i class="fa fa-globe"></i></button>
+    </div>
+    <div class="col text-center">
+      <button class="btn btn-lg btn-dark" (click)="openCityModal(addCityModal)">Новый город <i class="fa fa-university"></i></button>
+    </div>
+    <div class="col text-center">
+      <button class="btn btn-lg btn-dark" (click)="openAirportModal(addAirportModal)">Новый аэропорт <i class="fa fa-plane"></i></button>
+    </div>
+  </div>
   <table class="table table-hover table-dark mt-5">
-    <thead class="h4">
+    <thead class="h2">
     <tr>
-      <th class="text-center"  >№</th>
-      <th class="text-center"  >Страна</th>
-      <th class="text-center"  >Город</th>
-      <th class="text-center"  >Название аэропорта</th>
+      <th class="text-center">№</th>
+      <th class="text-center">Страна</th>
+      <th class="text-center">Город</th>
+      <th class="text-center">Название аэропорта</th>
     </tr>
     </thead>
     <tbody *ngIf="airportViewModels.length>0; then table else void_table;">
     </tbody>
     <ng-template #table>
-      <tr *ngFor="let airport of airportViewModels;let i = index" class="text-center ">
-        <td class="h6">{{i + 1}}</td>
-        <td class="h6"><a>{{airport.country}}</a></td>
-        <td class="h6"><a>{{airport.city}}</a></td>
-        <td class="h6"><a>{{airport.airport}}</a></td>
+      <tr *ngFor="let airport of airportViewModels;let i = index" class="text-center h3">
+        <td>{{i + 1}}</td>
+        <td><a style="cursor: pointer" (click)="openEditCountry(editCountryModal,airport)">{{airport.country}}</a></td>
+        <td><a style="cursor: pointer" (click)="openEditCity(editCityModal,airport)">{{airport.city}}</a></td>
+        <td><a style="cursor: pointer" (click)="openEditAirport(editAirportModal,airport)">{{airport.airport}}</a></td>
       </tr>
     </ng-template>
   </table>
@@ -25,3 +37,274 @@
     </tr>
   </ng-template>
 </div>
+
+
+<ng-template #addCountryModal>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Добавление новой страны</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <form>
+        <div class="form-group">
+          <label for="countryNameInput">Название страны</label>
+          <input type="text"
+                 id="countryNameInput"
+                 class="form-control"
+                 name="userLogin"
+                 required
+                 [(ngModel)]="newCountry.country"
+                 #countryName="ngModel"/>
+          <div [hidden]="countryName.valid||countryName.untouched" class="alert alert-danger">
+            Ошибка ввода названия страны
+          </div>
+        </div>
+      </form>
+      <div *ngIf="error"
+           class="alert alert-danger">
+        <span>{{errorMessage}}</span>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modalRef.hide()">Close</button>
+    <button class="btn btn-primary"
+            [disabled]=" countryName.invalid ||  countryName.untouched"
+            (click)="addCountry(newCountry) ">Добавить</button>
+  </div>
+</ng-template>
+
+<ng-template #addCityModal>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Добавление нового города</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <form>
+        <div class="form-group">
+          <label for="countrySelect" class="mt-3">Страна</label>
+          <select
+            class="form-control"
+            id="countrySelect"
+            name="countrySelect"
+            #country
+            [(ngModel)]="newCity.country">
+            <option *ngFor="let country of countries"
+                    [value]="country.idCountry">{{country.country}}</option>
+          </select>
+          <label for="cityName" class="mt-3">Название города</label>
+          <input type="text"
+                 id="cityName"
+                 class="form-control"
+                 name="cityName"
+                 required
+                 [(ngModel)]="newCity.city"
+                 #cityName="ngModel"/>
+          <div [hidden]="cityName.valid||cityName.untouched" class="alert alert-danger">
+            Ошибка ввода названия города
+          </div>
+        </div>
+      </form>
+      <div *ngIf="error"
+           class="alert alert-danger">
+        <span>{{errorMessage}}</span>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modalRef.hide()">Close</button>
+    <button class="btn btn-primary"
+            [disabled]=" cityName.invalid ||  cityName.untouched"
+            (click)="addCity(newCity,country.value) ">Добавить</button>
+  </div>
+</ng-template>
+
+<ng-template #addAirportModal>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Добавление нового аэропорта</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <form>
+        <div class="form-group">
+          <label for="countrySelectForAirport" class="mt-3">Страна</label>
+          <select
+            class="form-control"
+            id="countrySelectForAirport"
+            name="countrySelectForAirport"
+            required
+            #idCountryLoad
+            (change)="loadCitiesByCountry(idCountryLoad.value)"
+            [(ngModel)]="idCountry">
+            <option *ngFor="let country of countries"
+                    [value]="country.idCountry">{{country.country}}</option>
+          </select>
+          <label for="citySelect" class="mt-3">Город</label>
+          <select
+            class="form-control"
+            id="citySelect"
+            name="citySelect"
+            required
+            #city
+            [(ngModel)]="newAirport.city">
+            <option *ngFor="let city of cities"
+                    [value]="city.idCity">{{city.city}}</option>
+          </select>
+          <label for="airportName" class="mt-3">Название аэропорта</label>
+          <input type="text"
+                 id="airportName"
+                 class="form-control"
+                 name="airportName"
+                 required
+                 [(ngModel)]="newAirport.airport"
+                 #airportName="ngModel"/>
+          <div [hidden]="airportName.valid||airportName.untouched" class="alert alert-danger">
+            Ошибка ввода названия аэропорта
+          </div>
+        </div>
+      </form>
+      <div *ngIf="error"
+           class="alert alert-danger">
+        <span>{{errorMessage}}</span>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modalRef.hide()">Close</button>
+    <button class="btn btn-primary"
+            [disabled]=" airportName.invalid ||  airportName.untouched"
+            (click)="addAirport(newAirport,city.value) ">Добавить</button>
+  </div>
+</ng-template>
+
+
+<ng-template #editCountryModal>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Редактирование страны</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <form>
+        <div class="form-group">
+          <label for="countryNameEdit">Название страны</label>
+          <input type="text"
+                 id="countryNameEdit"
+                 class="form-control"
+                 name="countryNameEdit"
+                 required
+                 [(ngModel)]="editCountry.country"
+                 #countryName="ngModel"/>
+          <div [hidden]="countryName.valid||countryName.untouched" class="alert alert-danger">
+            Ошибка ввода названия страны
+          </div>
+        </div>
+      </form>
+      <div *ngIf="error"
+           class="alert alert-danger">
+        <span>{{errorMessage}}</span>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modalRef.hide()">Close</button>
+    <button class="btn btn-primary"
+            [disabled]=" countryName.invalid ||  countryName.untouched"
+            (click)="addCountry(editCountry) ">Сохранить</button>
+    <button class="btn btn-danger"
+            (click)="deleteCountry(editCountry.idCountry)">Удалить</button>
+  </div>
+</ng-template>
+
+
+<ng-template #editCityModal>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Редактирование города</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <form>
+        <div class="form-group">
+          <label for="cityNameEdit">Название города</label>
+          <input type="text"
+                 id="cityNameEdit"
+                 class="form-control"
+                 name="cityNameEdit"
+                 required
+                 [(ngModel)]="editCity.city"
+                 #cityName="ngModel"/>
+          <div [hidden]="cityName.valid||cityName.untouched" class="alert alert-danger">
+            Ошибка ввода названия города
+          </div>
+        </div>
+      </form>
+      <div *ngIf="error"
+           class="alert alert-danger">
+        <span>{{errorMessage}}</span>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modalRef.hide()">Close</button>
+    <button class="btn btn-primary"
+            [disabled]=" cityName.invalid ||  cityName.untouched"
+            (click)="addCity(editCity,editCity.country) ">Сохранить</button>
+    <button class="btn btn-danger"
+           (click)="deleteCity(editCity.idCity)" >Удалить</button>
+  </div>
+</ng-template>
+
+
+<ng-template #editAirportModal>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Редактирование названия аэропорта</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <form>
+        <div class="form-group">
+          <label for="airportNameEdit">Название аэропорта</label>
+          <input type="text"
+                 id="airportNameEdit"
+                 class="form-control"
+                 name="airportNameEdit"
+                 required
+                 [(ngModel)]="editAirport.airport"
+                 #airportName="ngModel"/>
+          <div [hidden]="airportName.valid||airportName.untouched" class="alert alert-danger">
+            Ошибка ввода названия аэропорта
+          </div>
+        </div>
+      </form>
+      <div *ngIf="error"
+           class="alert alert-danger">
+        <span>{{errorMessage}}</span>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modalRef.hide()">Close</button>
+    <button class="btn btn-primary"
+            [disabled]=" airportName.invalid ||  airportName.untouched"
+            (click)="addAirport(editAirport,editAirport.city) ">Сохранить</button>
+    <button class="btn btn-danger"
+           (click)="deleteAirport(editAirport.idAirport)" >Удалить</button>
+  </div>
+</ng-template>

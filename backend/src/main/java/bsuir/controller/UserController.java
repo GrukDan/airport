@@ -19,8 +19,6 @@ public class UserController {
 
     @RequestMapping(value = "sign-in",method = RequestMethod.POST)
     public User signIn(@RequestBody User user){
-        System.out.println(user.toString());
-
         return userService.signIn(user.getLogin(),user.getPassword());
     }
 
@@ -32,6 +30,12 @@ public class UserController {
     @RequestMapping( method = RequestMethod.POST)
     public UserViewModel updateUser(@RequestBody UserViewModel userViewModel){
         return userService.updateUser(userViewModel);
+    }
+
+    @RequestMapping(value = "/update-experts",method = RequestMethod.POST)
+    public boolean updateExperts(@RequestBody List<Long> experts,
+                                 @RequestParam("idTask") long idTask){
+        return userService.updateExperts(experts,idTask);
     }
 
     @RequestMapping(value = "/by-id",method = RequestMethod.GET)
@@ -49,6 +53,11 @@ public class UserController {
         return userService.getAll();
     }
 
+    @RequestMapping(value = "/experts",method = RequestMethod.GET)
+    public List<UserViewModel> getExperts(){
+        return userService.getExperts();
+    }
+
     @RequestMapping(value = "/sort-parameter", method = RequestMethod.GET)
     public List<String> getSortParameter() {
         return userService.getSortParameter();
@@ -62,5 +71,15 @@ public class UserController {
             @RequestParam("direction") boolean direction,
             @RequestParam("search") String search) {
         return userService.getSortedUser(parameter, page, size, direction);
+    }
+
+    @RequestMapping(value = "/by-assessment-task",method = RequestMethod.GET)
+    public List<UserViewModel> getExpertsByAssessmentTask(@RequestParam("assessmentTask") long assessmentTask){
+        return userService.getExpertsByAssessmentTask(assessmentTask);
+    }
+
+    @RequestMapping(value = "/experts-by-id",method = RequestMethod.POST)
+    public List<UserViewModel> getExpertsByIdIn(@RequestBody List<Long> idUsers){
+        return userService.getExpertsByIdIn(idUsers);
     }
 }

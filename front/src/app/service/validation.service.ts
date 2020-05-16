@@ -55,6 +55,7 @@ export class ValidationService {
           Validators.minLength(2),
           Validators.maxLength(20),
           Validators.pattern(/^[ а-яА-ЯёЁa-zA-Z0-9]+$/)]],
+      alternative:['',[]],
       description: ['',
         [
           Validators.minLength(2),

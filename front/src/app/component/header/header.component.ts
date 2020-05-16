@@ -11,13 +11,18 @@ import {Router} from "@angular/router";
 import {Task} from "../../model/task";
 import {RoleService} from "../../service/role.service";
 import {ValidationService} from "../../service/validation.service";
+import {Alternative} from "../../model/alternative";
+import {AirportViewModel} from "../../model/view-models/airport-view-model";
+import {AirportService} from "../../service/airport.service";
+import {UserViewModel} from "../../model/view-models/user-view-model";
+import {AlternativeService} from "../../service/alternative.service";
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit,OnDestroy {
+export class HeaderComponent implements OnInit, OnDestroy {
 
   userForm: FormGroup;
   taskForm: FormGroup;
@@ -27,7 +32,15 @@ export class HeaderComponent implements OnInit,OnDestroy {
   user: User;
   task: Task;
   roles: Role[];
-  experts:User[];
+  experts: UserViewModel[];
+  updateExperts: UserViewModel[]
+  airportViewModels: AirportViewModel[];
+  alternatives: Alternative[];
+  selectAirportViewModels: AirportViewModel[];
+  addAlternativeButton: boolean;
+  addExpertButton: boolean;
+  repeatAlternativeError: boolean;
+  repeatExpertError: boolean;
   modalRef: BsModalRef;
   config = {
     animated: true
@@ -39,14 +52,19 @@ export class HeaderComponent implements OnInit,OnDestroy {
               private validationService: ValidationService,
               private roleService: RoleService,
               private taskService: TaskService,
+              private airportService: AirportService,
+              private alternativeService: AlternativeService,
               public tokenStorage: TokenStorageService,
               private router: Router) {
     this._createForm();
     this.user = new User();
-    this.task = new Task();
     this.roles = [];
     this.experts = [];
+    this.addAlternativeButton = true;
+    this.addExpertButton = true;
+    this.repeatAlternativeError = false;
   }
+
 
   ngOnInit() {
   }
@@ -65,9 +83,16 @@ export class HeaderComponent implements OnInit,OnDestroy {
     }
   }
 
-  loadUserForTask(): void {
-    this.subscriptions.push(this.userService.getUserForTasks().subscribe(experts => {
-      this.experts = experts as User[];
+  loadExperts(): void {
+    this.subscriptions.push(this.userService.getExperts().subscribe(experts => {
+      this.experts = experts as UserViewModel[];
+    }))
+  }
+
+
+  loadAirportViewModels() {
+    this.subscriptions.push(this.airportService.getAirportViewModels().subscribe(airportViewModels => {
+      this.airportViewModels = airportViewModels as AirportViewModel[];
     }))
   }
 
@@ -77,7 +102,9 @@ export class HeaderComponent implements OnInit,OnDestroy {
   }
 
   addUser(): void {
+    console.log(this.user)
     this.subscriptions.push(this.userService.save(this.user).subscribe(user => {
+        console.log(user)
         this.user = new User();
         this.userForm.reset();
         this.modalRef.hide();
@@ -86,9 +113,52 @@ export class HeaderComponent implements OnInit,OnDestroy {
     ))
   }
 
-  addTask(executor): void {
+  hasDuplicates(array) {
+    console.log(array)
+    return (new Set(array)).size !== array.length;
+  }
+
+  checkRepeatAlternative() {
+    this.repeatAlternativeError = this.hasDuplicates(this.alternatives
+      .filter(alternative => alternative.airport != undefined)
+      .map(alternative => alternative.airport))
+  }
+
+  checkRepeatExpert() {
+    this.repeatExpertError = this.hasDuplicates(this.updateExperts
+      .filter(expert => expert.idUser != undefined)
+      .map(expert => expert.idUser))
+  }
+
+  addAlternativeSelect() {
+    if (this.alternatives.length < this.airportViewModels.length) {
+      this.alternatives.push(new Alternative());
+    } else this.addAlternativeButton = false;
+  }
+
+  addExpertSelect() {
+    if (this.updateExperts.length < this.experts.length) {
+      this.updateExperts.push(new UserViewModel());
+    } else this.addExpertButton = false;
+  }
+
+  saveExperts(idTask: number) {
+    this.subscriptions.push(this.userService.updateExperts(this.updateExperts.map(expert => expert.idUser), idTask).subscribe())
+  }
+
+  saveAlternatives(idTask: number) {
+    this.subscriptions.push(this.alternativeService.saveAlternatives(this.alternatives
+      .map(function (alternative) {
+        alternative.task = idTask;
+        return alternative;
+      })).subscribe())
+  }
+
+  addTask(): void {
     this.task.dateOfCreation = Date.now().toString();
     this.subscriptions.push(this.taskService.save(this.task).subscribe(task => {
+      this.saveExperts(task.idTask);
+      this.saveAlternatives(task.idTask);
       this.task = new Task();
       this.taskForm.reset();
       this.modalRef.hide();
@@ -128,13 +198,18 @@ export class HeaderComponent implements OnInit,OnDestroy {
   }
 
   openTaskModal(template: TemplateRef<any>) {
+    this.loadAirportViewModels();
+    this.loadExperts();
+    this.task = new Task();
+    this.alternatives = [];
+    this.updateExperts = [];
+    this.selectAirportViewModels = [];
     this.modalRef = this.modalService.show(template, this.config);
   }
 
   openUserModal(template: TemplateRef<any>) {
     this.modalRef = this.modalService.show(template, this.config);
     this.loadRole();
-    this.loadUserForTask();
   }
 
   signOut() {
@@ -145,5 +220,6 @@ export class HeaderComponent implements OnInit,OnDestroy {
   btoa(s: string) {
     return btoa(s);
   }
+
 }
 

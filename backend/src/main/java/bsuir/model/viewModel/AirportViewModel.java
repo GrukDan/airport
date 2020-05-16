@@ -1,5 +1,7 @@
 package bsuir.model.viewModel;
 
+import bsuir.model.Airport;
+
 public class AirportViewModel {
 
     private long idAirport;
@@ -16,6 +18,12 @@ public class AirportViewModel {
         this.airport = airport;
         this.city = city;
         this.country = country;
+    }
+
+    public AirportViewModel(Airport airport){
+        this.idAirport = airport.getIdAirport();
+        this.idCity = airport.getCity();
+        this.airport = airport.getAirport();
     }
 
     public AirportViewModel(){}

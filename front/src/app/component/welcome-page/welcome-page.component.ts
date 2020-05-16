@@ -19,8 +19,8 @@ export class WelcomePageComponent implements OnInit {
     animated: true
   };
 
-  error:boolean;
-  errorMessage:string;
+  error: boolean;
+  errorMessage: string;
   templateShow: boolean;
   subscriptions: Subscription[];
   user: User;
@@ -38,7 +38,7 @@ export class WelcomePageComponent implements OnInit {
 
 
   ngOnInit() {
-   this.templateShow = !this.tokenStorage.isAuthorized()
+    this.templateShow = !this.tokenStorage.isAuthorized()
   }
 
   openModal(template: TemplateRef<any>) {
@@ -46,18 +46,23 @@ export class WelcomePageComponent implements OnInit {
   }
 
   authorization() {
-    if(this.user.login!="" && this.user.password!="") {
+    if (this.user.login != "" && this.user.password != "") {
       this.authService.login(this.user).subscribe(
         data => {
-          this.tokenStorage.saveUser(data);
-          this.router.navigate(['/home',
-            btoa(data.idUser.toString()),
-            data.userName + data.userSurname]);
-          this.modalRef.hide()
-        },
-        err => {
+          if (data) {
+            this.tokenStorage.saveUser(data);
+            this.router.navigate(['/home',
+              btoa(data.idUser.toString()),
+              data.userName + data.userSurname]);
+            this.modalRef.hide()
+          } else {
             this.error = true;
             this.errorMessage = "Невозможно авторизоваться. Проверьте логин или пароль"
+          }
+        },
+        err => {
+          this.error = true;
+          this.errorMessage = "Невозможно авторизоваться. Проверьте логин или пароль"
         }
       );
     }

@@ -11,7 +11,7 @@ public interface UserService {
 
     User saveUser(User user);
 
-    UserViewModel updateUser(User user);
+    UserViewModel updateUser(UserViewModel userViewModel);
 
     void delete(long id);
 
@@ -22,4 +22,12 @@ public interface UserService {
     UserPaginationModel getSortedUser(String parameter, int page, int size, boolean direction);
 
     UserViewModel getById(long id);
+
+    List<UserViewModel> getExperts();
+
+    boolean updateExperts(List<Long> experts, long idTask);
+
+    List<UserViewModel> getExpertsByAssessmentTask(long assessmentTask);
+
+    List<UserViewModel> getExpertsByIdIn(List<Long> idUsers);
 }

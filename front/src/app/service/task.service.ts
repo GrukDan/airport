@@ -37,7 +37,13 @@ export class TaskService {
     return this.http.get<string[]>('/api/tasks/sort-parameter');
   }
 
-  
+
+  getTaskById(id:number):Observable<Task>{
+    return this.http.get<Task>('/api/tasks',
+      {params:new HttpParams()
+          .set('id',id.toString())})
+  }
+
   getSortedTasks(parameter: string, page: number, size: number, direction: boolean, search: string = ''): Observable<TaskPaginationModel> {
     return this.http.get<TaskPaginationModel>(
       '/api/tasks/sort',

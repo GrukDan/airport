@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {User} from "../../model/user";
 import {Role} from "../../model/role";
 import {UserService} from "../../service/user.service";
@@ -11,6 +11,12 @@ import {TokenStorageService} from "../../service/token-storage.service";
 import {Subscription} from "rxjs";
 import {Task} from "../../model/task";
 import {UserViewModel} from "../../model/view-models/user-view-model";
+import {Rating} from "../../model/rating";
+import {RatingService} from "../../service/rating.service";
+import {AlternativeService} from "../../service/alternative.service";
+import {Alternative} from "../../model/alternative";
+import {AirportViewModel} from "../../model/view-models/airport-view-model";
+import {AirportService} from "../../service/airport.service";
 
 @Component({
   selector: 'app-home',
@@ -25,12 +31,24 @@ export class HomeComponent implements OnInit {
   editUserViewModel: UserViewModel;
   roles: Role[];
   tasks: Task[];
+  ratings: Rating[];
+  alternatives: Alternative[];
+  airportViewModels: AirportViewModel[];
+  alternativesId: number[];
   edit: boolean;
+  i: number;
+  sumRating: number;
+  checkRatingFlag: boolean;
+  estimateButton: boolean;
   userForm: FormGroup;
+  private airport: AirportViewModel;
 
   constructor(private userService: UserService,
               private roleService: RoleService,
               private taskService: TaskService,
+              private ratingService: RatingService,
+              private alternativeService: AlternativeService,
+              private airportService: AirportService,
               private route: ActivatedRoute,
               private fb: FormBuilder,
               private validationService: ValidationService,
@@ -40,16 +58,16 @@ export class HomeComponent implements OnInit {
     this.userViewModel = new UserViewModel();
     this.editUserViewModel = new UserViewModel();
     this.edit = false;
-    this.tasks = [];
-
-    // subscribe to the parameters observable
+    this.ratings = [];
+    this.alternatives = [];
+    this.alternativesId = []
+    this.checkRatingFlag = true;
     this.route.paramMap.subscribe(params => {
       this.idUser = Number(atob(params.get('id')));
       this.loadUserViewModel();
     });
-
-
   }
+
 
   ngOnInit() {
   }
@@ -57,8 +75,37 @@ export class HomeComponent implements OnInit {
   loadUserViewModel() {
     this.subscriptions.push(this.userService.getUserViewModel(this.idUser).subscribe(user => {
       this.userViewModel = user as UserViewModel;
+      if (this.userViewModel.assessmentTaskName)
+        this.loadAlternatives(user.idUser, user.assessmentTask);
       this.editUserViewModel = UserViewModel.clone(user);
-      this.loadTasks(user.idUser);
+    }))
+  }
+
+  loadAlternatives(idUser: number, idTask: number) {
+    this.subscriptions.push(this.alternativeService.getAlternativesByTask(idTask).subscribe(alternatives => {
+      this.alternatives = alternatives as Alternative[];
+      this.alternativesId = this.alternatives.map(alternative => alternative.idAlternative);
+      this.loadAirportViewModels(alternatives.map(alternative => alternative.airport));
+      this.loadRatings(idUser, this.alternativesId);
+    }))
+  }
+
+  loadAirportViewModels(airportsId: number[]) {
+    this.subscriptions.push(this.airportService.getAirportViewModelsByIdIn(airportsId).subscribe(airports => {
+      this.airportViewModels = airports as AirportViewModel[];
+    }))
+  }
+
+  loadRatings(idUser: number, alternativesId: number[]) {
+    this.subscriptions.push(this.ratingService.loadRatingsByUserAndAlternatives(idUser, alternativesId).subscribe(ratings => {
+      this.ratings = ratings as Rating[];
+      this.estimateButton = false;
+      if (this.ratings.length == 0) {
+        this.estimateButton = true;
+        alternativesId.forEach(alternativeId => {
+          this.ratings.push(new Rating().buildRating(alternativeId, 0, this.tokenStorage.getIdUser()));
+        })
+      }
     }))
   }
 
@@ -70,17 +117,25 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  loadTasks(idUser: number) {
-    this.subscriptions.push(this.taskService.getAllTasks().subscribe(tasks => {
-      this.tasks = tasks as Task[];
-    }))
-  }
-
-  saveUserViewModel(userViewModelForSaving: UserViewModel) {
+  saveUserViewModel(userViewModelForSaving
+                      :
+                      UserViewModel
+  ) {
     this.subscriptions.push(this.userService.saveUserViewModel(userViewModelForSaving).subscribe(userViewModel => {
       this.userViewModel = userViewModel as UserViewModel;
       this.editUserViewModel = UserViewModel.clone(userViewModel);
     }))
+  }
+
+  getAirportNameByAlternative(alternative
+                                :
+                                Alternative
+  ):
+    string {
+    if (this.airportViewModels) {
+      this.airport = this.airportViewModels.find(airport => airport.idAirport == alternative.airport);
+      return this.airport.country + '/' + this.airport.city + '/' + this.airport.airport;
+    } else return "";
   }
 
   changeEdit() {
@@ -89,26 +144,10 @@ export class HomeComponent implements OnInit {
 
   _createForm() {
     if (this.userForm == null) {
-       this.userForm = this.validationService.getUserFormGroup();
+      this.userForm = this.validationService.getUserFormGroup();
       this.userForm.controls['login'].clearValidators();
       this.userForm.controls['password'].clearValidators();
       this.userForm.controls['role'].clearValidators();
-      // if (this.tokenStorage.isAdmin() && this.userViewModel.iduser != this.tokenStorage.getIdUser()) {
-      //   this.userForm.controls['userName'].clearValidators();
-      //   this.userForm.controls['userSurname'].clearValidators();
-      //   this.userForm.controls['email'].clearValidators();
-      // }
-      // if (this.tokenStorage.isProjectManager() && this.userViewModel.iduser != this.tokenStorage.getIdUser()) {
-      //   this.userForm.controls['userName'].clearValidators();
-      //   this.userForm.controls['userSurname'].clearValidators();
-      //   this.userForm.controls['email'].clearValidators();
-      //   this.userForm.controls['role'].clearValidators();
-      // }
-      // if (!this.tokenStorage.isProjectManager()
-      //   && this.tokenStorage.isAdmin()
-      //   && this.tokenStorage.getIdUser() == this.userViewModel.iduser) {
-      //   this.userForm.controls['role'].clearValidators();
-      // }
     }
   }
 
@@ -137,7 +176,6 @@ export class HomeComponent implements OnInit {
   startEdit() {
     this._createForm();
     this.changeEdit()
-    //this.loadTasks();
     this.loadRole()
   }
 
@@ -148,6 +186,30 @@ export class HomeComponent implements OnInit {
   delete(iduser: number) {
     this.router.navigate(['/'])
     this.subscriptions.push(this.userService.delete(iduser).subscribe())
+  }
+
+  saveRatings(ratings: Rating[]) {
+    this.subscriptions.push(this.ratingService.save(ratings).subscribe(ratings => {
+      this.ratings = ratings as Rating[];
+      this.estimateButton = this.ratings.length != this.alternatives.length;
+      console.log(ratings);
+    }))
+  }
+
+  checkRatingSum(): boolean {
+    for (this.sumRating = 0, this.i = 1; this.i <= this.alternatives.length; this.i++) {
+      this.sumRating += this.i;
+    }
+    return this.checkRatingFlag = this.ratings.map(rating => rating.rating).reduce(function (a, b) {
+      return a + b;
+    }) == this.sumRating;
+  }
+
+  addRatings() {
+    if (this.checkRatingSum()) {
+      this.ratings.forEach(rating => rating.timeOfCreation = Date.now())
+      this.saveRatings(this.ratings);
+    }
   }
 
 }

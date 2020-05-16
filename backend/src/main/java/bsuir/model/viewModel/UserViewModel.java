@@ -9,7 +9,7 @@ public class UserViewModel extends User {
 
     @Override
     public String toString() {
-        return super.toString() +  "UserViewModel{" +
+        return super.toString() + "UserViewModel{" +
                 "roleName='" + roleName + '\'' +
                 ", assessmentTaskName='" + assessmentTaskName + '\'' +
                 '}';
@@ -31,14 +31,15 @@ public class UserViewModel extends User {
         this.assessmentTaskName = assessmentTaskName;
     }
 
-    public UserViewModel(){}
+    public UserViewModel() {
+    }
 
     public UserViewModel(String roleName, String assessmentTaskName) {
         this.roleName = roleName;
         this.assessmentTaskName = assessmentTaskName;
     }
 
-    public UserViewModel(User user){
+    public UserViewModel(User user) {
         setIdUser(user.getIdUser());
         setRole(user.getRole());
         setUserName(user.getUserName());
@@ -47,5 +48,16 @@ public class UserViewModel extends User {
         setAssessmentTask(user.getAssessmentTask());
     }
 
-
+    public User buildUser() {
+        User user = new User();
+        user.setIdUser(getIdUser());
+        user.setUserName(getUserName());
+        user.setUserSurname(getUserSurname());
+        user.setEmail(getEmail());
+        user.setAssessmentTask(getAssessmentTask());
+        user.setRole(getRole());
+        user.setLogin(getLogin());
+        user.setPassword(getPassword());
+        return user;
+    }
 }

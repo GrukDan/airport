@@ -1,1 +1,99 @@
-<p>task-page works!</p>
+<div class="container-fluid">
+  <div class="row mt-5">
+    <div class="col-4">
+      <h1>Информация о задаче</h1>
+      <div class="my-5 ml-5" *ngIf="task">
+        <div id="taskName">
+          <h2>Название задачи:</h2>
+          <h3>{{task.taskName}}</h3>
+        </div>
+        <div id="dateOFCreation">
+          <h2>Дата создания задачи:</h2>
+          <h3>{{task.dateOfCreation | date}}</h3>
+        </div>
+        <div id="description">
+          <h2>Описание задачи:</h2>
+          <h4>{{task.description}}</h4>
+        </div>
+      </div>
+      <div class="ml-5" *ngIf="tokenStorage.isAdmin()">
+        <button class="btn btn-danger"
+                [routerLink]="['/']"
+                (click)="delete(idTask)">Удалить задачу</button>
+      </div>
+    </div>
+    <div class="col-8">
+      <h1>Оцененные альтернативы</h1>
+      <div class="my-5 table-responsive">
+        <table class="table table-sm table-hover table-dark mt-5">
+          <thead class="h4">
+          <tr>
+            <th class="text-center">Эксперт</th>
+            <th class="text-center" *ngFor=" let alternative of alternatives">
+              <div>
+                {{getAlternativeById(alternative.airport)?.airport}}
+              </div>
+            </th>
+          </tr>
+          </thead>
+          <tbody *ngIf="experts?.length>0;then table">
+          </tbody>
+          <ng-template #table>
+            <tr *ngFor="let expert of experts" class="text-center ">
+              <td>
+                <a [routerLink]="['/home',btoa(expert?.idUser?.toString()),
+        expert?.userName+ ' ' + expert?.userSurname]">
+                  {{expert.userSurname}} {{expert.userName}}
+                </a>
+              </td>
+              <td *ngFor="let alternative of alternatives;let i = index">
+                {{getRatingByExpertAndAlternative(ratings, expert.idUser, alternatives[i]?.idAlternative, i)}}
+              </td>
+            </tr>
+            <tr>
+              <td class="text-center h4">
+                Веса целей
+              </td>
+              <td *ngFor="let alternative of alternatives;let i = index"
+                  class="text-center ">
+                {{getGoalsWeightByAlternative(solution, alternative.idAlternative) | number}}
+              </td>
+            </tr>
+          </ng-template>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="row my-5">
+    <div class="col-6">
+      <div>
+        <div class="chart">
+          <canvas baseChart
+                  [data]="chartData.pieData"
+                  [labels]="chartData.labels"
+                  [chartType]="chartData.pieChartType"
+                  [options]="chartData.chartOptions"
+                  [colors]="chartData.colors"
+                  [legend]="chartData.legend">
+          </canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div>
+        <div class="chart">
+          <div style="display: block">
+            <canvas baseChart
+                    [datasets]="barData.barChartData"
+                    [labels]="barData.barChartLabels"
+                    [options]="barData.barChartOptions"
+                    [legend]="barData.barChartLegend"
+                    [chartType]="barData.barChartType"
+                    [colors]="chartData.colors">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

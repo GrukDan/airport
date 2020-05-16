@@ -13,8 +13,8 @@ export class UserService {
   constructor(private http: HttpClient) {
   }
 
-  getUserForTasks(): Observable<User[]> {
-    return this.http.get<User[]>('/api/users');
+  getExperts(): Observable<UserViewModel[]> {
+    return this.http.get<UserViewModel[]>('/api/users/experts');
   }
 
   save(user: User): Observable<User> {
@@ -35,7 +35,7 @@ export class UserService {
 
   getUserViewModel(idUser: number): Observable<UserViewModel> {
     return this.http.get<UserViewModel>(
-      '/api/users/',
+      '/api/users/by-id',
       {
         params: new HttpParams()
           .set('id', idUser.toString())
@@ -58,5 +58,28 @@ export class UserService {
           .set('direction', direction.toString())
           .set('search', search)
       })
+  }
+
+  updateExperts(idExperts: number[], idTask: number): Observable<boolean> {
+    return this.http.post<boolean>(
+      '/api/users/update-experts',
+      idExperts,
+      {
+        params: new HttpParams()
+          .set('idTask', idTask.toString())
+      })
+  }
+
+  getExpertsByAssessmentTask(assessmentTask: number): Observable<UserViewModel[]> {
+    return this.http.get<UserViewModel[]>('/api/users/by-assessment-task',
+      {
+        params: new HttpParams()
+          .set('assessmentTask', assessmentTask.toString())
+      })
+  }
+
+
+  getExpertsByIdIn(expertsId: number[]):Observable<UserViewModel[]> {
+    return this.http.post<UserViewModel[]>('/api/users/experts-by-id',expertsId);
   }
 }

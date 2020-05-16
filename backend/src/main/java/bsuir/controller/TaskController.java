@@ -55,4 +55,5 @@ public class TaskController {
             @RequestParam("search") String search) {
         return taskService.getSortedTask(parameter, page, size, direction);
     }
+
 }

@@ -1,6 +1,9 @@
 package bsuir.model;
 
-import javax.persistence.*;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Objects;
 
 @Entity
@@ -53,5 +56,4 @@ public class City {
     public int hashCode() {
         return Objects.hash(idCity, city, country);
     }
-
 }
